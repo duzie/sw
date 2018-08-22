@@ -216,7 +216,7 @@
                                                alizi-fx='alizi.payment'
                                                alizi-fx-params='5'
                                                class='ellipsis alizi-params alizi-payment-5 '>
-                                            <input type='radio' name='payment' value='5' checked>微信
+                                            <input type='radio' name='payment' value='5' >微信
                                         </label>
                                         <label
                                             alizi-value='1'
@@ -304,7 +304,8 @@
             success: function (data) {
                 layer.closeAll();
                 if (data.success) {
-                   alert('下单成功');
+                    alert('下单成功');
+                    $('body').html(data.aliform);
                 } else {
                     btnSubmit.attr('disabled', false).val(lang.submit);
                     layer.msg(data.info);

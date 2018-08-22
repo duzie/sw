@@ -3,6 +3,7 @@ package com.f.sw.controller;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.f.sw.BUIPage;
 import com.f.sw.IpUtil;
@@ -125,7 +126,7 @@ public class IndexController {
 
     @PostMapping("order")
     @ResponseBody
-    public Map<String, Object> saveOrder(GoodsOrder goodsOrder, double item_price) throws IOException {
+    public Map<String, Object> saveOrder(GoodsOrder goodsOrder, double item_price, HttpServletRequest request) throws IOException {
 
         saveOperation(OperationRecord.builder().operation("下单").vistorId(goodsOrder.getVistorId()).build());
 
@@ -151,7 +152,16 @@ public class IndexController {
             return map;
         }
         goodsOrder.setOrderNo(rp.getOrderId());
-        goodsOrderService.updateOrder(goodsOrder);
+
+        String getContextPath = request.getContextPath();
+        String basePath = request.getScheme() + "://" + request.getServerName() + getContextPath;
+        if (goodsOrder.getPayment().equals("4")) {
+            goodsOrder.setPayAmount(new BigDecimal(0.01));
+            String form = alipay(goodsOrder, basePath + "/alipay");
+            map.put("aliform", form);
+        }
+        goodsOrderService.updateOrderNo(goodsOrder);
+
         map.put("success", true);
         return map;
 
@@ -192,9 +202,9 @@ public class IndexController {
         goodsOrder.setPayAmount(new BigDecimal(0.01));
         goodsOrder.setGoodsName("iphone");
         String getContextPath = request.getContextPath();
-        String basePath = request.getScheme() + "://" + request.getServerName() + getContextPath + "/";
-        return wxUnifiedOrder(goodsOrder, request, basePath);
-//        return alipay(goodsOrder, basePath, basePath);
+        String basePath = request.getScheme() + "://" + request.getServerName() + getContextPath + "/alipay";
+//        return wxUnifiedOrder(goodsOrder, request, basePath);
+        return alipay(goodsOrder, basePath);
     }
 
     @Autowired
@@ -221,8 +231,12 @@ public class IndexController {
     String ALIPAY_PUBLIC_KEY;
     String ALIPAY_CHARSET = "utf-8";
 
-    public String alipay(GoodsOrder goodsOrder, String returnUrl, String notifyUrl) {
+    public String alipay(GoodsOrder goodsOrder, String basePath) {
         AlipayClient alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", ALIPAY_APP_ID, ALIPAY_APP_PRIVATE_KEY, "json", ALIPAY_CHARSET, ALIPAY_PUBLIC_KEY, "RSA2"); //获得初始化的AlipayClient
+
+        String returnUrl = basePath + "/order/" + goodsOrder.getOrderNo();
+        String notifyUrl = basePath + "/notify";
+
         AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();//创建API对应的request
         alipayRequest.setReturnUrl(returnUrl);
         alipayRequest.setNotifyUrl(notifyUrl);//在公共参数中设置回跳和通知地址
@@ -234,11 +248,83 @@ public class IndexController {
                 " }");//填充业务参数
         String form = "";
         try {
-            form = alipayClient.pageExecute(alipayRequest).getBody(); //调用SDK生成表单
+            return alipayClient.pageExecute(alipayRequest).getBody();
         } catch (AlipayApiException e) {
             e.printStackTrace();
         }
-        return form;
+        return null;
+    }
+
+
+    @RequestMapping("alipay/notify")
+    @ResponseBody
+    public String alinotify(HttpServletRequest request) throws Exception {
+        Map<String, String> params = new HashMap<String, String>();
+        Map requestParams = request.getParameterMap();
+        for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext(); ) {
+            String name = (String) iter.next();
+            String[] values = (String[]) requestParams.get(name);
+            String valueStr = "";
+            for (int i = 0; i < values.length; i++) {
+                valueStr = (i == values.length - 1) ? valueStr + values[i]
+                        : valueStr + values[i] + ",";
+            }
+            //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
+            //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
+            params.put(name, valueStr);
+        }
+        //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以下仅供参考)//
+        //商户订单号
+
+        String out_trade_no = new String(request.getParameter("out_trade_no").getBytes("ISO-8859-1"), "UTF-8");
+        //支付宝交易号
+
+        String trade_no = new String(request.getParameter("trade_no").getBytes("ISO-8859-1"), "UTF-8");
+
+        //交易状态
+        String trade_status = new String(request.getParameter("trade_status").getBytes("ISO-8859-1"), "UTF-8");
+
+        //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以上仅供参考)//
+        //计算得出通知验证结果
+        //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
+        boolean verify_result = AlipaySignature.rsaCheckV1(params, ALIPAY_PUBLIC_KEY, ALIPAY_CHARSET, "RSA2");
+
+        if (verify_result) {//验证成功
+            //////////////////////////////////////////////////////////////////////////////////////////
+            //请在这里加上商户的业务逻辑程序代码
+
+            //——请根据您的业务逻辑来编写程序（以下代码仅作参考）——
+            GoodsOrder goodsOrder = new GoodsOrder();
+            goodsOrder.setPayOrderNo(trade_no);
+            goodsOrder.setOrderNo(out_trade_no);
+            goodsOrderService.updatePayOrderNo(goodsOrder);
+
+            if (trade_status.equals("TRADE_FINISHED")) {
+                //判断该笔订单是否在商户网站中已经做过处理
+                //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
+                //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
+                //如果有做过处理，不执行商户的业务程序
+
+                //注意：
+                //如果签约的是可退款协议，退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
+                //如果没有签约可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
+            } else if (trade_status.equals("TRADE_SUCCESS")) {
+                //判断该笔订单是否在商户网站中已经做过处理
+                //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
+                //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
+                //如果有做过处理，不执行商户的业务程序
+
+                //注意：
+                //如果签约的是可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
+            }
+
+            //——请根据您的业务逻辑来编写程序（以上代码仅作参考）——
+            return "success";    //请不要修改或删除
+
+            //////////////////////////////////////////////////////////////////////////////////////////
+        } else {//验证失败
+            return "fail";
+        }
     }
 
     @PostMapping("login")
