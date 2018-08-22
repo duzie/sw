@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
+
+    <!-- 磁盘缓存位置 -->
+    <diskStore path="java.io.tmpdir/ehcache"/>
+
+    <!-- 用户所在飞镖机 -->
+    <cache name="cacheIP"
+           maxElementsInMemory="100000"
+           eternal="false"
+           overflowToDisk="false"
+           timeToIdleSeconds="60"
+           timeToLiveSeconds="60"
+           memoryStoreEvictionPolicy="LFU"/>
+
+
+</ehcache>

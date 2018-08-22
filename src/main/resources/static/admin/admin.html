@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>管理系统</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/main.css" rel="stylesheet" type="text/css" />
+</head>
+<body style="display: none">
+<div class="header">
+    <div class="dl-title"><span class="">后台管理</span></div>
+    <div class="dl-log">欢迎您<span class="dl-log-user"></span>
+        <a href="javascript:;" title="修改密码" class="reset_pwd dl-log-quit">[修改密码]</a>
+        <!--<a href="###" title="退出系统" class="dl-log-quit">[退出]</a>-->
+    </div>
+</div>
+<div class="content">
+    <div class="dl-main-nav">
+        <ul id="J_Nav"  class="nav-list ks-clear">
+            <li class="nav-item dl-selected"><div class="nav-item-inner nav-storage">首页</div></li>
+        </ul>
+    </div>
+    <ul id="J_NavContent" class="dl-tab-conten">
+
+    </ul>
+
+</div>
+
+<div id="content" class="hide">
+    <form id="J_Form" class="form-horizontal" method="post" action="/a/updatePwd">
+        <div class="row">
+            <div class="control-group span14">
+                <label class="control-label">新密码：</label>
+                <div class="controls">
+                    <input name="password" type="password" id="p1" data-rules="{required:true,minlength:6,maxlength:15}" >
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span14">
+                <label class="control-label">确认新密码：</label>
+                <div class="controls">
+                    <input type="password" data-rules="{equalTo:'#p1'}" >
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+<script type="text/javascript" src="../assets/js/bui-min.js"></script>
+<script type="text/javascript" src="../assets/js/config-min.js"></script>
+<script>
+    window.isIndex = true;
+    BUI.use(['bui/overlay','bui/form','common/main'],function(Overlay,Form){
+        var config = [{
+            id:'menu',
+            menu:[{
+                text:'首页内容',
+                items:[
+                    {id:'m1',text:'订单管理',href:'goodsOrder.html'},
+                    {id:'m2',text:'客户监控',href:'accessRecord.html'},
+                    {id:'m2',text:'访客操作记录',href:'operationRecord.html'},
+                    {id:'m2',text:'后台编辑',href:'webPage.html'}
+                ]
+            }]
+        }];
+        new PageUtil.MainPage({
+            modulesConfig : config
+        });
+
+        $.get('/a/channel/list',function(data){
+            if(data == '{success:false}')
+                location.href = 'index.html';
+            else
+                $('body').show();
+        });
+
+        var form = new Form.Form({
+            srcNode : '#J_Form',
+            submitType : 'ajax',
+            callback : function(data){
+                dialog.close();
+                BUI.Message.Alert('修改成功','success');
+            }
+        }).render();
+
+        var dialog = new Overlay.Dialog({
+            title:'修改密码',
+            width:450,
+            height:170,
+            contentId:'content',
+            success:function () {
+                form.submit();
+            }
+        });
+
+        $('.reset_pwd').on('click',function () {
+            form.clearFields();
+            form.clearErrors();
+            dialog.show();
+        });
+    });
+
+</script>
+</body>
+</html>

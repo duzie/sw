@@ -1,0 +1,42 @@
+package com.f.sw.entity;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.util.Date;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "S_GOODS_ORDER")
+public class GoodsOrder {
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private Integer id;
+    private String vistorId;
+    private Date createDate;
+    private String orderNo;
+    private BigDecimal amount;
+    private String sku;
+    private String goodsName;
+    private Integer quantity;
+    private String name;
+    private String mobile;
+    private String province;
+    private String city;
+    private String area;
+    private String street;
+    private String address;
+    private String remark;
+    private String payment;
+    private String payOrderNo;
+    private BigDecimal payAmount;
+    private Integer state;//0下单，1支付
+    private Date payDate;
+
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title> 搜索表单</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/page-min.css" rel="stylesheet" type="text/css" />
+    <style>
+
+        .bui-grid-table .bui-grid-cell-text {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <form id="searchForm" class="form-horizontal">
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">访问IP：</label>
+                <div class="controls">
+                    <input type="text" class="control-text" name="param[ip]">
+                </div>
+            </div>
+            <div class="control-group span8">
+                <label class="control-label">投放渠道：</label>
+                <div class="controls" >
+                    <select  id="channel" name="param[channel]">
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">访问域名：</label>
+                <div class="controls" >
+                    <select  name="param[host]">
+                        <option value="">全部</option>
+                        <option value="jxtx1.baijiu-world.com">jxtx1.baijiu-world.com</option>
+                        <option value="jxtx2.baijiu-world.com">jxtx2.baijiu-world.com</option>
+                        <option value="jxtx3.baijiu-world.com">jxtx3.baijiu-world.com</option>
+                        <option value="jxtx4.baijiu-world.com">jxtx4.baijiu-world.com</option>
+                        <option value="jxtx5.baijiu-world.com">jxtx5.baijiu-world.com</option>
+                    </select>
+                </div>
+            </div>
+            <div class="span3 offset2">
+                <button  type="button" id="btnSearch" class="button button-primary">搜索</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="search-grid-container">
+        <div id="grid"></div>
+    </div>
+</div>
+<script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+<script type="text/javascript" src="../assets/js/bui-min.js"></script>
+<script type="text/javascript" src="../assets/js/config-min.js"></script>
+<script type="text/javascript">
+    BUI.use(['common/search','common/page'],function (Search) {
+
+        var columns = [
+                {title:'访客ID',dataIndex:'serialNO',width:150},
+                {title:'访客IP',dataIndex:'ip',width:100},
+                {title:'来源',dataIndex:'referrer',width:120},
+                {title:'访问域名',dataIndex:'host',width:150},
+                {title:'投放渠道',dataIndex:'channel',width:100},
+                {title:'打开页面时间',dataIndex:'openDate',width:130},
+                {title:'关闭页面时间',dataIndex:'closeDate',width:130},
+                {title:'下拉到底',dataIndex:'isPulldown',width:60},
+                {title:'移动端',dataIndex:'isMobile',width:50},
+                {title:'硬件型号',dataIndex:'deviceType',width:200}
+            ],
+            store = Search.createStore('/a/accessRecord/list'),
+            gridCfg = Search.createGridCfg(columns);
+
+        var  search = new Search({
+                store : store,
+                gridCfg : gridCfg
+            }),
+            grid = search.get('grid');
+        $.get('/a/channel/list',function(data){
+            var s = '<option value="">请选择</option>';
+            for(var i = 0; i < data.length; i++){
+                t = data[i];
+                s += '<option>'+t.name+'</option>'
+            }
+            $('#channel').html(s);
+        })
+
+    });
+</script>
+
+<body>
+</html>

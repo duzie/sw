@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title> 搜索表单</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/page-min.css" rel="stylesheet" type="text/css" />
+    <script src="../js/ueditor/ueditor.all.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="search-grid-container">
+        <div id="grid"></div>
+    </div>
+</div>
+
+<div id="content" class="hide">
+    <script id="editor" type="text/plain" style="width:600px;height:500px;"></script>
+</div>
+<script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+<script type="text/javascript" src="../assets/js/bui-min.js"></script>
+<script type="text/javascript" src="../assets/js/config-min.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/ueditor/ueditor.all.js"> </script>
+<script type="text/javascript" charset="utf-8" src="../js/ueditor/lang/zh-cn/zh-cn.js"></script>
+<script type="text/javascript">
+
+    BUI.use(['common/search','common/page','bui/overlay'],function (Search,Page,Overlay) {
+
+        var columns = [
+                {title:'操作',dataIndex:'',width:50,renderer : function(value,obj){
+                        var editStr = '<span class="grid-command btn-edit" title="编辑">编辑</span>';
+                        return editStr ;
+
+
+                    }},
+                {title:'ID',dataIndex:'id',width:80},
+                {title:'域名',dataIndex:'host',width:150}
+            ],
+            store = Search.createStore('/a/webPage/list'),
+            gridCfg = Search.createGridCfg(columns);
+
+        var  search = new Search({
+                store : store,
+                gridCfg : gridCfg
+            }),
+            grid = search.get('grid');
+
+
+
+        grid.on('cellclick',function(ev){
+            var sender = $(ev.domTarget);
+            var record = ev.record;
+            if(sender.hasClass('btn-edit')){
+                top.topManager.openPage({
+                    id : 'editPage',
+                    href : 'editPage.html?id=' + record.id,
+                    title : '修改'
+                });
+            }
+        });
+
+
+
+    });
+</script>
+
+<body>
+</html>

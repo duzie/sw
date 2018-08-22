@@ -1,0 +1,18 @@
+/*
+ * 标题：阿狸子订单系统
+ * 作者：justo2008（旺旺号）
+ * 官方网址：www.alizi.net
+ * 淘宝店铺：https://hiweb.taobao.com/
+ * 警示信息：您可以复制使用本站静态文件（html/css/js/images），但请保留原创作者（旺旺：justo2008）信息，谢谢。
+ */
+
+.alizi-order .alizi-rows{position:relative;padding-top:.2rem;}
+.alizi-order .rows-head{position:absolute;left:0;width:5rem;font-weight:normal;border-bottom:none;padding:2px 0;text-align:right;}
+.alizi-order .rows-params{padding-left:5.5rem;line-height:2rem;}
+.alizi-order .alizi-params{border:1px solid #ccc;padding:0 .2rem;}
+.alizi-order .alizi-params.alizi-params-image{padding:.3rem;}
+.alizi-order select,.alizi-order  .alizi-input-text{border-width:1px;padding:0;height:2rem;}
+textarea.alizi-input-text{height:auto !important;}
+.alizi-order .alizi-submit{width:100%;}
+.alizi-order .rows-id-params.rows-id-params-select .rows-head{display:block;}
+.alizi-order .rows-id-params.rows-id-params-select .rows-params{margin-left:5.5rem;}

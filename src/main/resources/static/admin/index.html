@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+    <title>登陆</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/signin.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <script src="../js/ie-emulation-modes-warning.js"></script>
+    <script src="../js/jquery-1.8.1.min.js"></script>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container" style="display: none">
+    <form class="form-signin" role="form" id="loginform" action="" method="post">
+        <input type="text" name="account" id="user_login" class="form-control" placeholder="登陆名" required autofocus>
+        <input type="password" name="password" id="user_pass" class="form-control" placeholder="密码" required>
+        <p></p>
+        <button class="btn btn-lg btn-primary btn-block" type="button">登陆</button>
+    </form>
+</div>
+</body>
+</html>
+
+<script type="text/javascript">
+
+    $(function(){
+        if(top.isIndex)
+            top.location.href = '/';
+        else
+            $('.container').show();
+        $('body').bind('keyup',function(e){
+            if(e.keyCode == 13)
+                $('.btn-primary').click();
+        })
+        $('.btn-primary').click(function(){
+            var u = $('#user_login').val();
+            var p = $('#user_pass').val();
+            if(p == '' || u == ''){
+                alert('用户名或密码不能为空');
+                return;
+            }
+            $.ajax({
+                url:'/login',
+                type:'post',
+                data:$('#loginform').serialize(),
+                cache:false,
+                success:function(data){
+                    if(data)
+                        location.href='admin.html';
+                    else
+                        alert(data.message);
+                }
+            });
+        });
+    });
+</script>
