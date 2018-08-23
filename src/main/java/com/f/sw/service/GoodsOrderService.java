@@ -14,5 +14,9 @@ public interface GoodsOrderService {
 
     Page<GoodsOrder> find(BUIPage page);
 
+    /**
+     * 更新订单号和支付订单号
+     * @param goodsOrder
+     */
     void updateOrderNoAndPayOrderNo(GoodsOrder goodsOrder);
 }

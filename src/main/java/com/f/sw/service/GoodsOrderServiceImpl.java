@@ -27,7 +27,7 @@ public class GoodsOrderServiceImpl implements GoodsOrderService {
 
     @Override
     public Optional<GoodsOrder> findById(int id) {
-      return goodsOrderRepository.findById(id);
+        return goodsOrderRepository.findById(id);
     }
 
     @Override
@@ -79,10 +79,11 @@ public class GoodsOrderServiceImpl implements GoodsOrderService {
             GoodsOrder o = ot.get();
             o.setOrderNo(goodsOrder.getOrderNo());
             o.setPayOrderNo(goodsOrder.getPayOrderNo());
+            if (!StringUtils.equals(o.getPayment(), "1"))
+                goodsOrder.setState(1);
             goodsOrderRepository.save(o);
         }
     }
-
 
 
 }
