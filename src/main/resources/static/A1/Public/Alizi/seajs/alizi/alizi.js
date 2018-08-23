@@ -201,7 +201,7 @@ define(function(require, exports, module) {
         }
     }
 
-    $('#goodsName').val($('.alizi-params:eq(0)').text().trim());
+    $('#goodsName').val($('input[name="sku"]:checked').parent().text().trim());
 
     $('.alizi-params').bind('click',function(){
         var _this = $(this),className='active';
@@ -217,7 +217,7 @@ define(function(require, exports, module) {
         }else{
             _this.addClass(className).siblings().removeClass(className);
         }
-        $('#goodsName').val(_this.text().trim());
+        $('#goodsName').val($('input[name="sku"]:checked').parent().text().trim());
         if(target){
             if(target.indexOf(':')===0){
                 _this.find('input').get(0).checked=true;

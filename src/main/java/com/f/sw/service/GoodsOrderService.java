@@ -14,6 +14,5 @@ public interface GoodsOrderService {
 
     Page<GoodsOrder> find(BUIPage page);
 
-    void updateOrderNo(GoodsOrder goodsOrder);
-    void updatePayOrderNo(GoodsOrder goodsOrder);
+    void updateOrderNoAndPayOrderNo(GoodsOrder goodsOrder);
 }

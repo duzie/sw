@@ -16,6 +16,7 @@ import com.f.sw.service.AccessRecordService;
 import com.f.sw.service.AreaService;
 import com.f.sw.service.GoodsOrderService;
 import com.f.sw.service.WebPageService;
+import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
@@ -66,7 +67,6 @@ public class IndexController {
     public static Map<String, List<Long>> ipMap = new HashMap<>();
 
     synchronized boolean ipxz(String ip) {
-
         long time = System.currentTimeMillis();
         long otime = time - 10 * 1000;
         List<Long> list = ipMap.get(ip);
@@ -148,6 +148,7 @@ public class IndexController {
         return "index";
     }
 
+
     @GetMapping("order/{id}")
     public String order(@PathVariable int id, Model model, HttpServletRequest request) {
         if (ipxz(IpUtil.getIpAdrress(request))) {
@@ -194,9 +195,7 @@ public class IndexController {
                 map.put("aliform", form);
                 break;
             case "5":
-                goodsOrder.setPayAmount(new BigDecimal(0.01));
-                WxPayUnifiedOrderResult r = wxUnifiedOrder(goodsOrder, request, basePath);
-                map.put("mwebUrl", r.getMwebUrl());
+                map.put("wxpay", "true");
                 break;
             case "1":
                 Response rp = GoodsApi.createOrder(goodsOrder);
@@ -205,14 +204,34 @@ public class IndexController {
                     goodsOrder.setOrderNo(rp.getExpMsg());
                 } else
                     goodsOrder.setOrderNo(rp.getOrderId());
-                goodsOrderService.updateOrderNo(goodsOrder);
-                map.put("orderId", goodsOrder.getId());
+                goodsOrderService.updateOrderNoAndPayOrderNo(goodsOrder);
+
 
                 break;
         }
+        map.put("id", goodsOrder.getId());
         return map;
 
     }
+
+    @PostMapping("order/{id}")
+    public String wxpay(@PathVariable int id, Model model, HttpServletRequest request) {
+        if (ipxz(IpUtil.getIpAdrress(request))) {
+            return "redirect:xz.html";
+        }
+        Optional<GoodsOrder> opt = goodsOrderService.findById(id);
+
+        String getContextPath = request.getContextPath();
+        String basePath = request.getScheme() + "://" + request.getServerName() + getContextPath;
+        if (opt.isPresent()) {
+            GoodsOrder goodsOrder = opt.get();
+            goodsOrder.setPayAmount(new BigDecimal(0.01));
+            WxPayUnifiedOrderResult r = wxUnifiedOrder(goodsOrder, request, basePath);
+            model.addAttribute("mwebUrl", r.getMwebUrl());
+        }
+        return "wxpay";
+    }
+
 
     @PostMapping("operation")
     @ResponseBody
@@ -275,6 +294,28 @@ public class IndexController {
         return null;
     }
 
+    @RequestMapping("wxpay/notify")
+    @ResponseBody
+    public String wxnotify(@RequestBody String xmlData) throws WxPayException {
+
+        WxPayOrderNotifyResult rs = this.wxService.parseOrderNotifyResult(xmlData);
+        Optional<GoodsOrder> opt = goodsOrderService.findById(Integer.valueOf(rs.getOutTradeNo()));
+        if (opt.isPresent()) {
+            GoodsOrder goodsOrder = opt.get();
+            goodsOrder.setPayOrderNo(rs.getTransactionId());
+
+            Response rp = GoodsApi.createOrder(goodsOrder);
+            if (!rp.isExcuteReusult()) {
+                goodsOrder.setOrderNo(rp.getExpMsg());
+            } else
+                goodsOrder.setOrderNo(rp.getOrderId());
+
+            goodsOrderService.updateOrderNoAndPayOrderNo(goodsOrder);
+
+            return "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+        }
+        return "";
+    }
 
     @Value("${web.alipay.appid}")
     String ALIPAY_APP_ID;
@@ -347,16 +388,23 @@ public class IndexController {
             //请在这里加上商户的业务逻辑程序代码
 
             //——请根据您的业务逻辑来编写程序（以下代码仅作参考）——
-            GoodsOrder goodsOrder = new GoodsOrder();
-            goodsOrder.setPayOrderNo(trade_no);
-            goodsOrder.setId(Integer.valueOf(out_trade_no));
-            goodsOrderService.updatePayOrderNo(goodsOrder);
-            return "success";    //请不要修改或删除
+            Optional<GoodsOrder> opt = goodsOrderService.findById(Integer.valueOf(out_trade_no));
+            if (opt.isPresent()) {
+                GoodsOrder goodsOrder = opt.get();
+                goodsOrder.setPayOrderNo(trade_no);
+                Response rp = GoodsApi.createOrder(goodsOrder);
+                if (!rp.isExcuteReusult()) {
+                    goodsOrder.setOrderNo(rp.getExpMsg());
+                } else
+                    goodsOrder.setOrderNo(rp.getOrderId());
+
+                goodsOrderService.updateOrderNoAndPayOrderNo(goodsOrder);
+                return "success";    //请不要修改或删除
+            }
 
             //////////////////////////////////////////////////////////////////////////////////////////
-        } else {//验证失败
-            return "fail";
         }
+        return "fail";
     }
 
     @PostMapping("login")

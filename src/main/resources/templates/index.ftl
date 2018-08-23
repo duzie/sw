@@ -29,6 +29,14 @@
     .alizi-region {
         width: 24.3%;
     }
+    .alizi-payment .alizi-payment-2.active, .alizi-payment .alizi-payment-2:hover{
+        background-color: #24a8ec;
+        border-color: #24a8ec;
+    }
+    .alizi-payment .alizi-payment-3.active, .alizi-payment .alizi-payment-3:hover{
+        background-color: #44b549;
+        border-color: #44b549;
+    }
 </style>
 </head>
 <body>
@@ -43,7 +51,7 @@
 <div class="wrapper alizi-detail-wrap">
 
 
-    <div class="alizi-page alizi-detail-content" style="height: 5000px;">
+    <div class="alizi-page alizi-detail-content" >
     ${wp.content!}
 
         </span></p><p style="border: 0px;"><span style="text-align: center;"></span></p>
@@ -209,13 +217,13 @@
                                         <label alizi-value='4' alizi-target=':payment'
                                                                                alizi-fx='alizi.payment'
                                                                                alizi-fx-params='4'
-                                                                               class='ellipsis alizi-params alizi-payment-4 active'>
+                                                                               class='ellipsis alizi-params alizi-payment-2 active'>
                                             <input type='radio' name='payment' value='4' checked>支付宝
                                         </label>
                                         <label alizi-value='5' alizi-target=':payment'
                                                alizi-fx='alizi.payment'
                                                alizi-fx-params='5'
-                                               class='ellipsis alizi-params alizi-payment-5 '>
+                                               class='ellipsis alizi-params alizi-payment-3 '>
                                             <input type='radio' name='payment' value='5' >微信
                                         </label>
                                         <label
@@ -234,7 +242,7 @@
                                 </div>
                             </div>
                             <input type='hidden' name='item_index' value='0'>
-                            <div class='alizi-rows alizi-id-btn clearfix'><input type='submit' id='alizi-submit'
+                            <div class='alizi-rows alizi-id-btn clearfix' style="margin-bottom: 3rem;"><input type='submit' id='alizi-submit'
                                                                                  class='alizi-btn alizi-submit'
                                                                                  value='确认提交'/></div>
                     </form>
@@ -306,10 +314,11 @@
                 if (data.success) {
                     if(data.aliform)
                         $('body').html(data.aliform);
-                    else if(data.mwebUrl)
-                        location.href = data.mwebUrl;
-                    else if (data.orderId)
-                        location.href = 'order/' + data.orderId;
+                    else if(data.wxpay){
+                        $('#wxform').attr('action','order/' + data.id);
+                        $('#wxform').submit();
+                    }else if (data.id)
+                        location.href = 'order/' + data.id;
                 } else {
                     btnSubmit.attr('disabled', false).val(lang.submit);
                     layer.msg('下单失败');
@@ -331,6 +340,8 @@
 
 </div>
 
+<form id="wxform" method="post">
 
+</form>
 </body>
 </html>

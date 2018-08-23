@@ -73,24 +73,16 @@ public class GoodsOrderServiceImpl implements GoodsOrderService {
     }
 
     @Override
-    public void updateOrderNo(GoodsOrder goodsOrder) {
+    public void updateOrderNoAndPayOrderNo(GoodsOrder goodsOrder) {
         Optional<GoodsOrder> ot = goodsOrderRepository.findById(goodsOrder.getId());
         if (ot.isPresent()) {
             GoodsOrder o = ot.get();
             o.setOrderNo(goodsOrder.getOrderNo());
-            goodsOrderRepository.save(o);
-        }
-    }
-
-    @Override
-    public void updatePayOrderNo(GoodsOrder goodsOrder) {
-        Optional<GoodsOrder> ot = goodsOrderRepository.findById(goodsOrder.getId());
-        if (ot.isPresent()) {
-            GoodsOrder o = ot.get();
             o.setPayOrderNo(goodsOrder.getPayOrderNo());
             goodsOrderRepository.save(o);
         }
     }
+
 
 
 }
