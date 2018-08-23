@@ -26,6 +26,11 @@ public class GoodsOrderServiceImpl implements GoodsOrderService {
     GoodsOrderRepository goodsOrderRepository;
 
     @Override
+    public Optional<GoodsOrder> findById(int id) {
+      return goodsOrderRepository.findById(id);
+    }
+
+    @Override
     public void save(GoodsOrder goodsOrder) {
         goodsOrderRepository.save(goodsOrder);
     }
@@ -79,8 +84,9 @@ public class GoodsOrderServiceImpl implements GoodsOrderService {
 
     @Override
     public void updatePayOrderNo(GoodsOrder goodsOrder) {
-        GoodsOrder o = goodsOrderRepository.findByOrderNo(goodsOrder.getOrderNo());
-        if (o != null) {
+        Optional<GoodsOrder> ot = goodsOrderRepository.findById(goodsOrder.getId());
+        if (ot.isPresent()) {
+            GoodsOrder o = ot.get();
             o.setPayOrderNo(goodsOrder.getPayOrderNo());
             goodsOrderRepository.save(o);
         }

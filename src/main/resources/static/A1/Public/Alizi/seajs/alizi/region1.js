@@ -18,7 +18,7 @@ define(function(require, exports, module) {
     function load(elId,id){
         id = id.split('|')[0];
         $.get('region/' + id,function(data){
-            var s ='<option value="0|">请选择</option>';
+            var s ='<option value="0|-">请选择</option>';
             $.each(data,function (i,t) {
                 s+='<option value="'+ t.id +'|'+ t.areaName +'">'+ t.areaName +'</option>';
             })

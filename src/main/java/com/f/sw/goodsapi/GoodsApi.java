@@ -11,7 +11,6 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
 
-import java.io.IOException;
 import java.util.*;
 
 @Log4j2
@@ -46,7 +45,7 @@ public class GoodsApi {
 
     }
 
-    public static Response createOrder(GoodsOrder o) throws IOException {
+    public static Response createOrder(GoodsOrder o) {
         Map<String, String> map = new HashMap<>();
         map.put("Timestamp", DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
         map.put("OuterCode", o.getId().toString());
@@ -77,13 +76,19 @@ public class GoodsApi {
         map.put("Token", token.toUpperCase());
         map.put("Accesskey", accesskey);
 
-        log.debug(om.writeValueAsString(map));
-        String s = Request.Post(ORDER_RECORD)
-                .setHeader("Content-Type", "application/json")
-                .bodyString(om.writeValueAsString(map), ContentType.APPLICATION_JSON)
-                .execute().returnContent().asString();
-        log.debug(s);
-        return om.readValue(s, Response.class);
+        try {
+            log.debug(om.writeValueAsString(map));
+            String s = Request.Post(ORDER_RECORD)
+                    .setHeader("Content-Type", "application/json")
+                    .bodyString(om.writeValueAsString(map), ContentType.APPLICATION_JSON)
+                    .execute().returnContent().asString();
+            log.debug(s);
+            return om.readValue(s, Response.class);
+        } catch (Exception e) {
+
+        }
+        return Response.builder().ExcuteReusult(false).expMsg("接口调用失败").build();
+
     }
 
     private static JavaType getCollectionType(Class<?> collectionClass, Class<?>... elementClasses) {

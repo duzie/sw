@@ -63,10 +63,34 @@ public class IndexController {
 
     public static Map<String, WebPage> pageMap = new HashMap<>();
 
+    public static Map<String, List<Long>> ipMap = new HashMap<>();
+
+    synchronized boolean ipxz(String ip) {
+
+        long time = System.currentTimeMillis();
+        long otime = time - 10 * 1000;
+        List<Long> list = ipMap.get(ip);
+        if (list == null) {
+            list = new ArrayList<>();
+        }
+        list = list.stream().filter(l -> l > otime).collect(Collectors.toList());
+        if (list.size() > 5)
+            return true;
+        else {
+            list.add(time);
+            ipMap.put(ip, list);
+            return false;
+        }
+    }
+
     List<Channel> channelList = new ArrayList<>();
 
     @RequestMapping("")
     public String index(HttpServletRequest request, Model model) throws Exception {
+
+        if (ipxz(IpUtil.getIpAdrress(request))) {
+            return "redirect:xz.html";
+        }
 
         AccessRecord ar = new AccessRecord();
         ar.setIp(IpUtil.getIpAdrress(request));
@@ -124,9 +148,27 @@ public class IndexController {
         return "index";
     }
 
+    @GetMapping("order/{id}")
+    public String order(@PathVariable int id, Model model, HttpServletRequest request) {
+        if (ipxz(IpUtil.getIpAdrress(request))) {
+            return "redirect:xz.html";
+        }
+        Optional<GoodsOrder> opt = goodsOrderService.findById(id);
+        if (opt.isPresent()) {
+            model.addAttribute("o", opt.get());
+        }
+        return "order";
+    }
+
     @PostMapping("order")
     @ResponseBody
     public Map<String, Object> saveOrder(GoodsOrder goodsOrder, double item_price, HttpServletRequest request) throws IOException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("success", true);
+        if (ipxz(IpUtil.getIpAdrress(request))) {
+            map.put("msg", "ip 受限");
+            return map;
+        }
 
         saveOperation(OperationRecord.builder().operation("下单").vistorId(goodsOrder.getVistorId()).build());
 
@@ -143,26 +185,31 @@ public class IndexController {
         goodsOrder.setState(0);
         goodsOrderService.save(goodsOrder);
 
-        Map<String, Object> map = new HashMap<>();
-
-        Response rp = GoodsApi.createOrder(goodsOrder);
-
-        if (!rp.isExcuteReusult()) {
-            map.put("success", false);
-            return map;
-        }
-        goodsOrder.setOrderNo(rp.getOrderId());
-
         String getContextPath = request.getContextPath();
         String basePath = request.getScheme() + "://" + request.getServerName() + getContextPath;
-        if (goodsOrder.getPayment().equals("4")) {
-            goodsOrder.setPayAmount(new BigDecimal(0.01));
-            String form = alipay(goodsOrder, basePath + "/alipay");
-            map.put("aliform", form);
-        }
-        goodsOrderService.updateOrderNo(goodsOrder);
+        switch (goodsOrder.getPayment()) {
+            case "4":
+                goodsOrder.setPayAmount(new BigDecimal(0.01));
+                String form = alipay(goodsOrder, basePath);
+                map.put("aliform", form);
+                break;
+            case "5":
+                goodsOrder.setPayAmount(new BigDecimal(0.01));
+                WxPayUnifiedOrderResult r = wxUnifiedOrder(goodsOrder, request, basePath);
+                map.put("mwebUrl", r.getMwebUrl());
+                break;
+            case "1":
+                Response rp = GoodsApi.createOrder(goodsOrder);
+                if (!rp.isExcuteReusult()) {
+                    map.put("success", false);
+                    goodsOrder.setOrderNo(rp.getExpMsg());
+                } else
+                    goodsOrder.setOrderNo(rp.getOrderId());
+                goodsOrderService.updateOrderNo(goodsOrder);
+                map.put("orderId", goodsOrder.getId());
 
-        map.put("success", true);
+                break;
+        }
         return map;
 
     }
@@ -210,16 +257,22 @@ public class IndexController {
     @Autowired
     private WxPayService wxService;
 
-    public WxPayUnifiedOrderResult wxUnifiedOrder(GoodsOrder goodsOrder, HttpServletRequest request, String notifyUrl) throws WxPayException {
+    public WxPayUnifiedOrderResult wxUnifiedOrder(GoodsOrder goodsOrder, HttpServletRequest request, String baseUrl) {
+
         WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();
         orderRequest.setBody(goodsOrder.getGoodsName());
-        orderRequest.setOutTradeNo(goodsOrder.getOrderNo());
+        orderRequest.setOutTradeNo(goodsOrder.getId().toString());
         orderRequest.setTotalFee(goodsOrder.getPayAmount().multiply(new BigDecimal(100)).intValue());
         orderRequest.setSpbillCreateIp(IpUtil.getIpAdrress(request));
         orderRequest.setTradeType(WxPayConstants.TradeType.MWEB);
-        orderRequest.setNotifyUrl(notifyUrl);
+        orderRequest.setNotifyUrl(baseUrl + "/wxpay/notify");
 
-        return this.wxService.unifiedOrder(orderRequest);
+        try {
+            return this.wxService.unifiedOrder(orderRequest);
+        } catch (WxPayException e) {
+            log.error(e);
+        }
+        return null;
     }
 
 
@@ -234,14 +287,14 @@ public class IndexController {
     public String alipay(GoodsOrder goodsOrder, String basePath) {
         AlipayClient alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", ALIPAY_APP_ID, ALIPAY_APP_PRIVATE_KEY, "json", ALIPAY_CHARSET, ALIPAY_PUBLIC_KEY, "RSA2"); //获得初始化的AlipayClient
 
-        String returnUrl = basePath + "/order/" + goodsOrder.getOrderNo();
-        String notifyUrl = basePath + "/notify";
+        String returnUrl = basePath + "/order/" + goodsOrder.getId();
+        String notifyUrl = basePath + "/alipay/notify";
 
         AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();//创建API对应的request
         alipayRequest.setReturnUrl(returnUrl);
         alipayRequest.setNotifyUrl(notifyUrl);//在公共参数中设置回跳和通知地址
         alipayRequest.setBizContent("{" +
-                " \"out_trade_no\":\"" + goodsOrder.getOrderNo() + "\"," +
+                " \"out_trade_no\":\"" + goodsOrder.getId() + "\"," +
                 " \"total_amount\":\"" + goodsOrder.getPayAmount().doubleValue() + "\"," +
                 " \"subject\":\"" + goodsOrder.getGoodsName() + "\"," +
                 " \"product_code\":\"QUICK_WAP_PAY\"" +
@@ -296,29 +349,8 @@ public class IndexController {
             //——请根据您的业务逻辑来编写程序（以下代码仅作参考）——
             GoodsOrder goodsOrder = new GoodsOrder();
             goodsOrder.setPayOrderNo(trade_no);
-            goodsOrder.setOrderNo(out_trade_no);
+            goodsOrder.setId(Integer.valueOf(out_trade_no));
             goodsOrderService.updatePayOrderNo(goodsOrder);
-
-            if (trade_status.equals("TRADE_FINISHED")) {
-                //判断该笔订单是否在商户网站中已经做过处理
-                //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
-                //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
-                //如果有做过处理，不执行商户的业务程序
-
-                //注意：
-                //如果签约的是可退款协议，退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
-                //如果没有签约可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
-            } else if (trade_status.equals("TRADE_SUCCESS")) {
-                //判断该笔订单是否在商户网站中已经做过处理
-                //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
-                //请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
-                //如果有做过处理，不执行商户的业务程序
-
-                //注意：
-                //如果签约的是可退款协议，那么付款完成后，支付宝系统发送该交易状态通知。
-            }
-
-            //——请根据您的业务逻辑来编写程序（以上代码仅作参考）——
             return "success";    //请不要修改或删除
 
             //////////////////////////////////////////////////////////////////////////////////////////

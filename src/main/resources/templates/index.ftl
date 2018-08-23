@@ -177,14 +177,14 @@
                                     class='alizi-request '>*</span></label>
                                 <div class='rows-params'>
                                     <select name='province' id='province' class='alizi-region alizi-region-province' alizi-request='1'>
-                                        <option value="0|">请选择</option>
+                                        <option value="0|-">请选择</option>
                                        <#list province as p>
                                            <option value="${p.id?c}|${p.areaName}">${p.areaName}</option>
                                        </#list>
                                     </select>
-                                    <select name='city' id='city' class='alizi-region alizi-region-city' alizi-request='1'><option value="0|">请选择</option></select>
-                                    <select name='area' id='area' class='alizi-region alizi-region-area' alizi-request='1'><option value="0|">请选择</option></select>
-                                    <select name='street' id='street' class='alizi-region alizi-region-street' alizi-request='1'><option value="0|">请选择</option></select>
+                                    <select name='city' id='city' class='alizi-region alizi-region-city' alizi-request='1'><option value="0|-">请选择</option></select>
+                                    <select name='area' id='area' class='alizi-region alizi-region-area' alizi-request='1'><option value="0|-">请选择</option></select>
+                                    <select name='street' id='street' class='alizi-region alizi-region-street' alizi-request='1'><option value="0|-">请选择</option></select>
                                     <script type='text/javascript'>seajs.use(['alizi/region1'], function (region1) {
                                     });</script>
                                 </div>
@@ -304,11 +304,15 @@
             success: function (data) {
                 layer.closeAll();
                 if (data.success) {
-                    alert('下单成功');
-                    $('body').html(data.aliform);
+                    if(data.aliform)
+                        $('body').html(data.aliform);
+                    else if(data.mwebUrl)
+                        location.href = data.mwebUrl;
+                    else if (data.orderId)
+                        location.href = 'order/' + data.orderId;
                 } else {
                     btnSubmit.attr('disabled', false).val(lang.submit);
-                    layer.msg(data.info);
+                    layer.msg('下单失败');
                 }
             }
         });
