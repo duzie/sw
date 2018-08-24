@@ -64,24 +64,6 @@ public class IndexController {
 
     public static Map<String, WebPage> pageMap = new HashMap<>();
 
-    public static Map<String, List<Long>> ipMap = new HashMap<>();
-
-    synchronized boolean ipxz(String ip) {
-        long time = System.currentTimeMillis();
-        long otime = time - 10 * 1000;
-        List<Long> list = ipMap.get(ip);
-        if (list == null) {
-            list = new ArrayList<>();
-        }
-        list = list.stream().filter(l -> l > otime).collect(Collectors.toList());
-        if (list.size() > 5)
-            return true;
-        else {
-            list.add(time);
-            ipMap.put(ip, list);
-            return false;
-        }
-    }
 
     List<Channel> channelList = new ArrayList<>();
 
@@ -146,6 +128,11 @@ public class IndexController {
 
         model.addAttribute("goodsList", goodsList);
         return "index";
+    }
+
+    @GetMapping("close/{vistorId}")
+    public void closePage(@PathVariable String vistorId) {
+        accessRecordService.updateClosePageDate(vistorId);
     }
 
 
@@ -420,6 +407,25 @@ public class IndexController {
     @GetMapping("admin")
     public String admin() {
         return "redirect:/admin/index.html";
+    }
+
+    public static Map<String, List<Long>> ipMap = new HashMap<>();
+
+    synchronized boolean ipxz(String ip) {
+        long time = System.currentTimeMillis();
+        long otime = time - 10 * 1000;
+        List<Long> list = ipMap.get(ip);
+        if (list == null) {
+            list = new ArrayList<>();
+        }
+        list = list.stream().filter(l -> l > otime).collect(Collectors.toList());
+        if (list.size() > 5)
+            return true;
+        else {
+            list.add(time);
+            ipMap.put(ip, list);
+            return false;
+        }
     }
 
 

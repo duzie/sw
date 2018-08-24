@@ -44,12 +44,22 @@ public class AccessRecordServiceImpl implements AccessRecordService {
 
     @Override
     public void pulldown(String vistorId) {
-      Optional<AccessRecord> opt=  accessRecordRepository.findById(Integer.valueOf(vistorId.substring(10)));
-      if(opt.isPresent()){
-          AccessRecord ar = opt.get();
-          ar.setIsPulldown(true);
-          accessRecordRepository.save(ar);
-      }
+        Optional<AccessRecord> opt = accessRecordRepository.findById(Integer.valueOf(vistorId.substring(10)));
+        if (opt.isPresent()) {
+            AccessRecord ar = opt.get();
+            ar.setIsPulldown(true);
+            accessRecordRepository.save(ar);
+        }
+    }
+
+    @Override
+    public void updateClosePageDate(String vistorId) {
+        Optional<AccessRecord> opt = accessRecordRepository.findById(Integer.valueOf(vistorId.substring(10)));
+        if (opt.isPresent()) {
+            AccessRecord ar = opt.get();
+            ar.setCloseDate(new Date());
+            accessRecordRepository.save(ar);
+        }
     }
 
     @Override

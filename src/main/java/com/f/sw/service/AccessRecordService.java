@@ -23,4 +23,6 @@ public interface AccessRecordService {
     void updateAccountPwd(SysAccount account);
 
     void pulldown(String vistorId);
+
+    void updateClosePageDate(String vistorId);
 }

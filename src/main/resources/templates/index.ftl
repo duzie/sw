@@ -334,6 +334,10 @@
                 $.post('scrollBottom',{vistorId:'${serialNO}'})
             }
         });
+
+        setInterval(function(){
+            $.get('close/${serialNO}');
+        },30000)
     });
 
 </script>
