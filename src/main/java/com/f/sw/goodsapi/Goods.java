@@ -15,6 +15,6 @@ public class Goods {
     String sku;
     @JsonProperty("GoodsName")
     String goodsName;
-    @JsonProperty("UnitPrice")
-    double unitPrice;
+    @JsonProperty("ReferPrice")
+    double referPrice;
 }

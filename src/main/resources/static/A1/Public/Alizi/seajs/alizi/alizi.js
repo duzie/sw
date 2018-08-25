@@ -18,6 +18,10 @@ define(function(require, exports, module) {
         var qq = handle.find('input[name=qq]');
         var mail = handle.find('input[name=mail]');
         var verify = handle.find('input[name=verify]');
+        var province = handle.find('select[name=province]');
+        var city = handle.find('select[name=city]');
+        var area = handle.find('select[name=area]');
+        var street = handle.find('select[name=street]');
         var rule = /^1[3-8][0-9]\d{8}$/,ruleTw=/^(9|09)\d{8}$/,ruleJp=/^([789]|0[789])\d{9}$/;
         var nameReg=/^[\u0391-\uFFE5]+$/;
 
@@ -29,12 +33,16 @@ define(function(require, exports, module) {
 
 
         if(name.length!=0 && $.trim(name.val()).length<2){layer.msg(lang.emptyName);return false;}
-        //if(!nameReg.test(name.val())){ layer.msg('请填写有效的姓名');return false;}
-        //if(mobile.length!=0 && (rule.test(mobile.val()) == false && ruleTw.test(mobile.val()) == false) && ruleJp.test(mobile.val()) == false){layer.msg(lang.invalidMobile);return false;}
+        if(!nameReg.test(name.val())){ layer.msg('请填写有效的姓名');return false;}
+        if(mobile.length!=0 && (rule.test(mobile.val()) == false && ruleTw.test(mobile.val()) == false) && ruleJp.test(mobile.val()) == false){layer.msg(lang.invalidMobile);return false;}
         if(region.length!=0 && !region.eq(0).val()){layer.msg(lang.SelectRegion);return false;}
-        //if(address.length!=0 && !address.val()){layer.msg(lang.emptyAddress);return false;}
+        if(address.length!=0 && !address.val()){layer.msg(lang.emptyAddress);return false;}
         //if(mail.length!=0 && !mail.val()){layer.msg(lang.emptyEmail);return false;}
         if(verify.length!=0 && verify.val().length!= 4){layer.msg(lang.invalidVerify);return false;}
+        if(province.val() == '0|-'){layer.msg('请选择省份');return false;}
+        if(city.val() == '0|-'){layer.msg('请选择城市');return false;}
+        if(area.val() == '0|-'){layer.msg('请选择区域');return false;}
+        if(street.val() == '0|-'){layer.msg('请选择街道');return false;}
     };
 
     exports.quantity = function(){

@@ -3,6 +3,7 @@ package com.f.sw.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -16,11 +17,12 @@ import java.util.Date;
 public class GoodsOrder {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String vistorId;
     private Date createDate;
     private String orderNo;
+    private String sysOrderNo;
     private BigDecimal amount;
     private String sku;
     private String goodsName;
@@ -39,4 +41,9 @@ public class GoodsOrder {
     private Integer state;//0下单，1支付
     private Date payDate;
 
+    private String openId;
+
+    public String getSysOrderNo() {
+        return DateFormatUtils.format(createDate, "yyMMdd") + String.format("%09d", id);
+    }
 }

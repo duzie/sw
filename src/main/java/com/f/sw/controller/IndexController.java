@@ -17,8 +17,10 @@ import com.f.sw.service.AreaService;
 import com.f.sw.service.GoodsOrderService;
 import com.f.sw.service.WebPageService;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
+import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
+import com.github.binarywang.wxpay.bean.order.WxPayMwebOrderResult;
+import com.github.binarywang.wxpay.bean.order.WxPayNativeOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
-import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
@@ -26,6 +28,11 @@ import eu.bitwalker.useragentutils.Browser;
 import eu.bitwalker.useragentutils.OperatingSystem;
 import eu.bitwalker.useragentutils.UserAgent;
 import lombok.extern.log4j.Log4j2;
+import me.chanjar.weixin.common.api.WxConsts;
+import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
+import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -131,6 +138,7 @@ public class IndexController {
     }
 
     @GetMapping("close/{vistorId}")
+    @ResponseBody
     public void closePage(@PathVariable String vistorId) {
         accessRecordService.updateClosePageDate(vistorId);
     }
@@ -148,6 +156,16 @@ public class IndexController {
         return "order";
     }
 
+    @GetMapping("order/ispay/{id}")
+    @ResponseBody
+    public Integer order(@PathVariable int id) {
+        Optional<GoodsOrder> opt = goodsOrderService.findById(id);
+        if (opt.isPresent()) {
+            return opt.get().getState();
+        }
+        return 0;
+    }
+
     @PostMapping("order")
     @ResponseBody
     public Map<String, Object> saveOrder(GoodsOrder goodsOrder, double item_price, HttpServletRequest request) throws IOException {
@@ -158,7 +176,7 @@ public class IndexController {
             return map;
         }
 
-        saveOperation(OperationRecord.builder().operation("下单").vistorId(goodsOrder.getVistorId()).build());
+        saveOperation(OperationRecord.builder().operation("下单购买").vistorId(goodsOrder.getVistorId()).build());
 
         goodsOrder.setProvince(goodsOrder.getProvince().split("\\|")[1]);
         goodsOrder.setCity(goodsOrder.getCity().split("\\|")[1]);
@@ -201,6 +219,7 @@ public class IndexController {
 
     }
 
+
     @PostMapping("order/{id}")
     public String wxpay(@PathVariable int id, Model model, HttpServletRequest request) {
         if (ipxz(IpUtil.getIpAdrress(request))) {
@@ -213,8 +232,15 @@ public class IndexController {
         if (opt.isPresent()) {
             GoodsOrder goodsOrder = opt.get();
             goodsOrder.setPayAmount(new BigDecimal(0.01));
-            WxPayUnifiedOrderResult r = wxUnifiedOrder(goodsOrder, request, basePath);
-            model.addAttribute("mwebUrl", r.getMwebUrl());
+            if (RequestUtil.JudgeIsMoblie(request)) {
+                WxPayMwebOrderResult r = wxUnifiedOrder(goodsOrder, request, basePath);
+                model.addAttribute("wx", r);
+            } else {
+                WxPayNativeOrderResult r = wxUnifiedOrder(goodsOrder, request, basePath);
+                model.addAttribute("wx", r);
+            }
+
+            model.addAttribute("o", goodsOrder);
         }
         return "wxpay";
     }
@@ -229,6 +255,7 @@ public class IndexController {
     @PostMapping("scrollBottom")
     @ResponseBody
     public void scrollBottom(String vistorId) {
+        saveOperation(OperationRecord.builder().operation("下拉到底").vistorId(vistorId).build());
         accessRecordService.pulldown(vistorId);
     }
 
@@ -261,20 +288,65 @@ public class IndexController {
     }
 
     @Autowired
-    private WxPayService wxService;
+    private WxPayService wxPayService;
 
-    public WxPayUnifiedOrderResult wxUnifiedOrder(GoodsOrder goodsOrder, HttpServletRequest request, String baseUrl) {
+    @Autowired
+    private WxMpService wxMpService;
+
+    @Value("${web.wx.mp.oauth2Url}")
+    String oauth2Url;
+
+    @RequestMapping("wx/{id}")
+    public String wx(@PathVariable String id) {
+        String u = wxMpService.oauth2buildAuthorizationUrl(oauth2Url, WxConsts.OAuth2Scope.SNSAPI_USERINFO, id);
+        return "redirect:" + u;
+    }
+
+    @RequestMapping("wx/oauth")
+    public String callBack(String code, String state, HttpServletRequest request, Model model) throws WxErrorException {
+        WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.oauth2getAccessToken(code);
+
+        //获得用户基本信息
+        WxMpUser wxMpUser = wxMpService.oauth2getUserInfo(wxMpOAuth2AccessToken, null);
+
+        Optional<GoodsOrder> opt = goodsOrderService.findById(Integer.valueOf(state));
+
+        String getContextPath = request.getContextPath();
+        String basePath = request.getScheme() + "://" + request.getServerName() + getContextPath;
+        if (opt.isPresent()) {
+            GoodsOrder goodsOrder = opt.get();
+            goodsOrder.setPayAmount(new BigDecimal(0.01));
+            goodsOrder.setOpenId(wxMpUser.getOpenId());
+            WxPayMpOrderResult r = wxUnifiedOrder(goodsOrder, request, basePath);
+            model.addAttribute("wx", r);
+            model.addAttribute("o", goodsOrder);
+        }
+        return "wxpay";
+    }
+
+
+    public <T> T wxUnifiedOrder(GoodsOrder goodsOrder, HttpServletRequest request, String baseUrl) {
 
         WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();
         orderRequest.setBody(goodsOrder.getGoodsName());
         orderRequest.setOutTradeNo(goodsOrder.getId().toString());
         orderRequest.setTotalFee(goodsOrder.getPayAmount().multiply(new BigDecimal(100)).intValue());
         orderRequest.setSpbillCreateIp(IpUtil.getIpAdrress(request));
-        orderRequest.setTradeType(WxPayConstants.TradeType.MWEB);
+
+        if (RequestUtil.isWechat(request)) {
+            orderRequest.setTradeType(WxPayConstants.TradeType.JSAPI);
+            orderRequest.setOpenid(goodsOrder.getOpenId());
+        } else if (RequestUtil.JudgeIsMoblie(request)) {
+            orderRequest.setTradeType(WxPayConstants.TradeType.MWEB);
+        } else {
+            orderRequest.setTradeType(WxPayConstants.TradeType.NATIVE);
+            orderRequest.setProductId(goodsOrder.getSku());
+        }
+
         orderRequest.setNotifyUrl(baseUrl + "/wxpay/notify");
 
         try {
-            return this.wxService.unifiedOrder(orderRequest);
+            return this.wxPayService.createOrder(orderRequest);
         } catch (WxPayException e) {
             log.error(e);
         }
@@ -285,7 +357,7 @@ public class IndexController {
     @ResponseBody
     public String wxnotify(@RequestBody String xmlData) throws WxPayException {
 
-        WxPayOrderNotifyResult rs = this.wxService.parseOrderNotifyResult(xmlData);
+        WxPayOrderNotifyResult rs = this.wxPayService.parseOrderNotifyResult(xmlData);
         Optional<GoodsOrder> opt = goodsOrderService.findById(Integer.valueOf(rs.getOutTradeNo()));
         if (opt.isPresent()) {
             GoodsOrder goodsOrder = opt.get();

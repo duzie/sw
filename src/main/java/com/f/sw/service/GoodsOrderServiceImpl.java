@@ -14,10 +14,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class GoodsOrderServiceImpl implements GoodsOrderService {
@@ -79,8 +76,11 @@ public class GoodsOrderServiceImpl implements GoodsOrderService {
             GoodsOrder o = ot.get();
             o.setOrderNo(goodsOrder.getOrderNo());
             o.setPayOrderNo(goodsOrder.getPayOrderNo());
-            if (!StringUtils.equals(o.getPayment(), "1"))
+            if (!StringUtils.equals(o.getPayment(), "1")){
                 goodsOrder.setState(1);
+                goodsOrder.setPayDate(new Date());
+            }
+
             goodsOrderRepository.save(o);
         }
     }

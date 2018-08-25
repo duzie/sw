@@ -48,7 +48,7 @@ public class GoodsApi {
     public static Response createOrder(GoodsOrder o) {
         Map<String, String> map = new HashMap<>();
         map.put("Timestamp", DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-        map.put("OuterCode", o.getId().toString());
+        map.put("OuterCode", o.getSysOrderNo());
         map.put("Sku", o.getSku());
         map.put("Product", o.getGoodsName());
         map.put("Qty", o.getQuantity().toString());

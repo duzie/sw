@@ -135,7 +135,7 @@
                             <div class='rows-params'>
 
                                 <#list goodsList as g>
-                                    <label alizi-value='${(g.unitPrice?c)!}' alizi-target='#item_price' alizi-fx='alizi.quantity' alizi-fx-params='0' class=' ellipsis alizi-params ${(g_index == 0)?string('active','')} '>
+                                    <label alizi-value='${(g.referPrice?c)!}' alizi-target='#item_price' alizi-fx='alizi.quantity' alizi-fx-params='0' class=' ellipsis alizi-params ${(g_index == 0)?string('active','')} '>
                                         <input type='radio' name='sku' value='${g.sku}' ${(g_index == 0)?string('checked','')} >
                                         ${g.goodsName}</label>
                                 </#list>
@@ -279,11 +279,11 @@
 
 <div class='alizi-remark'></div>
 <div class="alizi-foot-nav">
-    <a class="alizi-up" href="#" >TOP</a>
+    <a class="alizi-up operation" o="点击TOP" href="#" >TOP</a>
     <ul>
-        <li class="foot-nav-1" ><a href="#aliziOrder"><strong class="icon edit">立即下单</strong></a></li>
-        <li class="foot-nav-2" ><a href="sms:18682364239"><strong class="icon query operation" o="信息咨询">信息咨询</strong></a></li>
-        <li class="foot-nav-3" ><a href="tel:4001159866"><strong class="icon weixin operation" o="电话咨询">电话咨询</strong></a></li>
+        <li class="foot-nav-1" ><a href="#aliziOrder"><strong class="icon edit operation" o="立即下单" >立即下单</strong></a></li>
+        <li class="foot-nav-2" ><a href="sms:18682364239"><strong class="icon query showno operation" o="信息咨询" no="18682364239">信息咨询</strong></a></li>
+        <li class="foot-nav-3" ><a href="tel:4001159866"><strong class="icon weixin showno operation" o="电话咨询" no="4001159866">电话咨询</strong></a></li>
     </ul>
 </div>
 
@@ -315,8 +315,12 @@
                     if(data.aliform)
                         $('body').html(data.aliform);
                     else if(data.wxpay){
-                        $('#wxform').attr('action','order/' + data.id);
-                        $('#wxform').submit();
+                        if(isWeiXin()){
+                            location.href = 'wx/' + data.id;
+                        }else{
+                            $('#wxform').attr('action','order/' + data.id);
+                            $('#wxform').submit();
+                        }
                     }else if (data.id)
                         location.href = 'order/' + data.id;
                 } else {
@@ -338,7 +342,41 @@
         setInterval(function(){
             $.get('close/${serialNO}');
         },30000)
+
+        function detectmob() {
+            if( navigator.userAgent.match(/Android/i)
+                    || navigator.userAgent.match(/webOS/i)
+                    || navigator.userAgent.match(/iPhone/i)
+                    || navigator.userAgent.match(/iPad/i)
+                    || navigator.userAgent.match(/iPod/i)
+                    || navigator.userAgent.match(/BlackBerry/i)
+                    || navigator.userAgent.match(/Windows Phone/i)
+            ){
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        if(!detectmob()){
+            $('.showno').click(function(){
+                var t = $(this);
+                layer.alert(t.attr('o') + ":" + t.attr('no') );
+            });
+        }
+
+        function isWeiXin(){
+            var ua = window.navigator.userAgent.toLowerCase();
+            if(ua.match(/MicroMessenger/i) == 'micromessenger'){
+                return true;
+            }else{
+                return false;
+            }
+        }
+
     });
+
+
 
 </script>
 
