@@ -89,7 +89,7 @@ public class IndexController {
         ar.setHost(host);
 
         String s = DateFormatUtils.format(new Date(), "yyyyMMdd");
-        if (StringUtils.isNoneBlank(ar.getReferrer())) {
+        if (StringUtils.isNotBlank(ar.getReferrer())) {
             Optional<Channel> otl = channelList.stream().filter(e -> ar.getReferrer().indexOf(e.getHost()) > 0).findFirst();
             if (otl.isPresent()) {
                 Channel channel = otl.get();

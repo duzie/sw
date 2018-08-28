@@ -242,7 +242,7 @@
                                 </div>
                             </div>
                             <input type='hidden' name='item_index' value='0'>
-                            <div class='alizi-rows alizi-id-btn clearfix' style="margin-bottom: 3rem;"><input type='submit' id='alizi-submit'
+                            <div class='alizi-rows alizi-id-btn clearfix'><input type='submit' id='alizi-submit'
                                                                                  class='alizi-btn alizi-submit'
                                                                                  value='确认提交'/></div>
                     </form>
@@ -272,12 +272,15 @@
             }, 'shipping': {"id": 0}
         }
     });</script>
-    <span style="text-align: center;"></span><br/></p></div>
+    <img src="img/icp.jpg" style="margin-bottom: 3rem;">
+</div>
 </div>
 </div>
 
 
-<div class='alizi-remark'></div>
+<div class='alizi-remark'>
+
+</div>
 <div class="alizi-foot-nav">
     <a class="alizi-up operation" o="点击TOP" href="#" >TOP</a>
     <ul>

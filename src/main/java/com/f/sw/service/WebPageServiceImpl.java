@@ -115,3 +115,4 @@ public class WebPageServiceImpl implements WebPageService {
 
     }
 }
+//sudo ln -s /home/sw/f-sw-1.0-SNAPSHOT.jar /etc/init.d/sw

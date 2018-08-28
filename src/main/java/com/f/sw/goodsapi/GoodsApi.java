@@ -32,12 +32,12 @@ public class GoodsApi {
         String str = accesskey + "IsCBGoods" + 0 + "Timestamp" + map.get("Timestamp") + accessSecret;
         String token = DigestUtils.sha1Hex(str);
         map.put("Token", token.toUpperCase());
-        System.out.println(token);
         log.debug(om.writeValueAsString(map));
         String s = Request.Post(CB_GOODS_QUERY)
                 .setHeader("Content-Type", "application/json")
                 .bodyString(om.writeValueAsString(map), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asString();
+        log.debug(s);
         JsonNode node = om.readTree(s);
         String goodsStr = node.get("GoodsInfo").asText();
         JavaType javaType = getCollectionType(ArrayList.class, Goods.class);
