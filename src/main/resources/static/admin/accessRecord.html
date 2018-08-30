@@ -52,6 +52,11 @@
             <div class="span3 offset2">
                 <button  type="button" id="btnSearch" class="button button-primary">搜索</button>
             </div>
+            <div class="span10 ">
+                <button  type="button"  class="button channel ">渠道信息更新</button>直接在表中添加渠道信息后需要要此操作
+            </div>
+
+
         </div>
     </form>
 
@@ -93,6 +98,12 @@
             }
             $('#channel').html(s);
         })
+
+        $('.channel').click(function(){
+            $.get('/channel/init',function(data){
+                alert('更新成功');
+            });
+        });
 
     });
 </script>

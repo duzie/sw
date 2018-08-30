@@ -260,31 +260,20 @@ public class IndexController {
     }
 
     @GetMapping("channel/init")
-    public void loadChannel() {
+    @ResponseBody
+    public boolean loadChannel() {
         Iterable<Channel> iter = webPageService.findChannel();
         channelList.clear();
         iter.forEach(single -> {
             channelList.add(single);
         });
+        return true;
     }
 
     @RequestMapping("region/{id}")
     @ResponseBody
     public Object region(@PathVariable int id) {
         return areaService.findByParentId(id);
-    }
-
-    @RequestMapping("pay")
-    @ResponseBody
-    public Object testpay(HttpServletRequest request) throws WxPayException {
-        GoodsOrder goodsOrder = new GoodsOrder();
-        goodsOrder.setOrderNo("1");
-        goodsOrder.setPayAmount(new BigDecimal(0.01));
-        goodsOrder.setGoodsName("iphone");
-        String getContextPath = request.getContextPath();
-        String basePath = request.getScheme() + "://" + request.getServerName() + getContextPath + "/alipay";
-//        return wxUnifiedOrder(goodsOrder, request, basePath);
-        return alipay(goodsOrder, basePath);
     }
 
     @Autowired
