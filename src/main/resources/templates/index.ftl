@@ -281,7 +281,7 @@
 <div class='alizi-remark'>
 
 </div>
-<div class="alizi-foot-nav">
+<div class="alizi-foot-nav alizi-detail-wrap">
     <a class="alizi-up operation" o="点击TOP" href="#" >TOP</a>
     <ul>
         <li class="foot-nav-1" ><a href="#aliziOrder"><strong class="icon edit operation" o="立即下单" >立即下单</strong></a></li>
