@@ -68,11 +68,12 @@
 <script type="text/javascript" src="../assets/js/bui-min.js"></script>
 <script type="text/javascript" src="../assets/js/config-min.js"></script>
 <script type="text/javascript">
-    BUI.use(['common/search','common/page'],function (Search) {
+    BUI.use(['common/search','common/page','bui/grid'],function (Search,Page,Grid) {
 
         var columns = [
                 {title:'访客ID',dataIndex:'serialNO',width:150},
                 {title:'访客IP',dataIndex:'ip',width:100},
+                {title:'地理位置',dataIndex:'location',width:120},
                 {title:'来源',dataIndex:'referrer',width:120},
                 {title:'访问域名',dataIndex:'host',width:150},
                 {title:'投放渠道',dataIndex:'channel',width:100},

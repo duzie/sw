@@ -12,9 +12,12 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+/**
+ * 商品过滤
+ */
 @Table(name = "S_GOODS_IGNORE")
 public class GoodsIgnore {
     @Id
     Integer id;
-    String sku;
+    String sku;//接口API中的SKU
 }

@@ -14,16 +14,19 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+/**
+ * 落地页
+ */
 @Table(name = "S_WEB_PAGE")
 public class WebPage {
 
     @Id
     Integer id;
-    String host;
+    String host;//生效域名
     @Lob
-    String content;
-    String title;
-    String keywords;
-    String description;
-    Date updateDate;
+    String content;//内容
+    String title;//标题
+    String keywords;//关键字
+    String description;//描述
+    Date updateDate;//更新时间
 }

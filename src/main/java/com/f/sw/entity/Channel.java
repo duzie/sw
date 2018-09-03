@@ -12,13 +12,16 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+/**
+ * 渠道配置
+ */
 @Table(name = "S_CHANNEL")
 public class Channel {
 
     @Id
     Integer id;
-    String name;
-    String host;
-    String nm;
+    String name;//渠道名
+    String host;//渠道域名
+    String nm;//渠道简写
 
 }

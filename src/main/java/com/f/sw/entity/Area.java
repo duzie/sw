@@ -12,6 +12,9 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+/**
+ * 地区
+ */
 @Table(name = "S_AREA")
 public class Area {
 

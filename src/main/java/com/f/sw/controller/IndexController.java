@@ -74,7 +74,7 @@ public class IndexController {
 
   List<Channel> channelList = new ArrayList<>();
 
-  @RequestMapping("")
+  @RequestMapping("*")
   public String index(HttpServletRequest request, Model model) throws Exception {
 
     if (ipxz(IpUtil.getIpAdrress(request))) {
@@ -83,10 +83,14 @@ public class IndexController {
 
     AccessRecord ar = new AccessRecord();
     ar.setIp(IpUtil.getIpAdrress(request));
+    ar.setLocation(IpUtil.getLocation(ar.getIp()));
     ar.setReferrer(request.getHeader("referer"));
-    URL url = new URL(request.getRequestURL().toString());
+
+    String requestUrl = request.getRequestURL().toString();
+    log.debug(requestUrl);
+    URL url = new URL(requestUrl);
     String host = url.getHost();
-    ar.setHost(host);
+    ar.setHost(requestUrl);
 
     String s = DateFormatUtils.format(new Date(), "yyyyMMdd");
     if (StringUtils.isNotBlank(ar.getReferrer())) {
@@ -117,7 +121,6 @@ public class IndexController {
     ar.setDeviceType(system + " " + browserName);
     accessRecordService.save(ar);
 
-    log.debug(host);
     WebPage wp = pageMap.get(host);
     if (wp == null) wp = pageMap.values().iterator().next();
     log.debug(wp.toString());
@@ -128,7 +131,7 @@ public class IndexController {
     List<Goods> list = GoodsApi.getGoods();
     List<GoodsIgnore> ignore = accessRecordService.findGoodsIgnore();
     List<Goods> goodsList = list.stream().filter(
-      goods -> !ignore.stream().filter(
+      goods -> ignore.stream().filter(
         ig -> goods.getSku().equals(ig.getSku())
       ).findFirst().isPresent()
     ).collect(Collectors.toList());

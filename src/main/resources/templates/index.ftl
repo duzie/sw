@@ -130,7 +130,7 @@
                         <input type='hidden' name='page' value=''>
                         <input type='hidden' name='buy_num' value=''>
                         <input type='hidden' name='buy_num_decrease' value=''>
-                        <div class='alizi-rows clearfix rows-id-params rows-id-params-radio'><label class='rows-head'>支付方式<span
+                        <div class='alizi-rows clearfix rows-id-params rows-id-params-radio'><label class='rows-head'>商品名称<span
                                 class='alizi-request '>*</span></label>
                             <div class='rows-params'>
 
@@ -376,7 +376,7 @@
                 return false;
             }
         }
-
+      $('input[name="sku"]:eq(2)').click();
     });
 
 
