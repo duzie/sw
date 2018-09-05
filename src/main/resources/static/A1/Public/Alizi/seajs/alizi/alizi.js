@@ -106,6 +106,17 @@ define(function(require, exports, module) {
 
         $(".alizi-total-price").html(subTotal);
         $(".alizi-total-number").html(totalNum);
+
+        var rprice = $('.alizi-params.active').attr('alizi-rvalue');
+        rprice = rprice*totalNum;
+        rprice = language=='zh-cn'?rprice.toFixed(2):(rprice.toFixed(2)*100)/100;
+        $(".alizi-total-rprice").html(rprice);
+
+      var dprice = $('.alizi-params.active').attr('alizi-dvalue');
+      dprice = dprice*totalNum;
+      dprice = language=='zh-cn'?dprice.toFixed(2):(dprice.toFixed(2)*100)/100;
+      $(".alizi-total-dprice").html(dprice);
+
     }
 
     exports.timer = function(elem,intDiff){
@@ -260,7 +271,6 @@ define(function(require, exports, module) {
         $('.subextends-'+i).find('input').attr('disabled',false);
         $('.subextends-'+i).find('select').attr('disabled',false);
 
-        console.log(i);
     })
     $('.alizi-params-change').change(function(){
         var _this = $(this),fx = _this.attr('alizi-fx'),params = _this.attr('alizi-fx-params'),price = _this.find("option:selected").attr('value-price');

@@ -135,20 +135,36 @@
                             <div class='rows-params'>
 
                                 <#list goodsList as g>
-                                    <label alizi-value='${(g.referPrice?c)!}' alizi-target='#item_price' alizi-fx='alizi.quantity' alizi-fx-params='0' class=' ellipsis alizi-params ${(g_index == 0)?string('active','')} '>
+                                    <label alizi-value='${(g.price?c)!}'
+                                           alizi-rvalue='${(g.referPrice?c)!}'
+                                           alizi-dvalue='${(g.discount?c)!}'
+                                           alizi-target='#item_price' alizi-fx='alizi.quantity' alizi-fx-params='0' class=' ellipsis alizi-params ${(g_index == 0)?string('active','')} '>
                                         <input type='radio' name='sku' value='${g.sku}' ${(g_index == 0)?string('checked','')} >
                                         ${g.goodsName}</label>
                                 </#list>
                             </div>
                         </div>
                         <div class='alizi-box alizi-box-params'>
-                            <div class='alizi-rows clearfix rows-id-price'><label class='rows-head'>订单价格<span
+                            <div class='alizi-rows clearfix rows-id-price'><label class='rows-head'>商品价格<span
                                     class='alizi-request alizi-request-none'>*</span></label>
-                                <div class='rows-params'><span class='alizi-shipping' style='display:none;'><strong
-                                        class='alizi-order-price'>0.00</strong>+<strong
-                                        class='alizi-shipping-price'>0.00</strong>(运费)=</span>￥<strong
-                                        class='alizi-total-price'></strong></div>
+                                <div class='rows-params'>
+                                  ￥<strong class='alizi-total-rprice'></strong></div>
                             </div>
+
+                          <div class='alizi-rows clearfix rows-id-price'><label class='rows-head'>优惠价格<span
+                            class='alizi-request alizi-request-none'>*</span></label>
+                            <div class='rows-params'>
+                              ￥<strong class='alizi-total-dprice'></strong></div>
+                          </div>
+
+                          <div class='alizi-rows clearfix rows-id-price'><label class='rows-head'>支付价格<span
+                            class='alizi-request alizi-request-none'>*</span></label>
+                            <div class='rows-params'><span class='alizi-shipping' style='display:none;'><strong
+                              class='alizi-order-price'>0.00</strong>+<strong
+                              class='alizi-shipping-price'>0.00</strong>(运费)=</span>￥<strong
+                              class='alizi-total-price'></strong></div>
+                          </div>
+
                             <div>
                                 <div></div>
                             </div>
@@ -307,10 +323,10 @@
             },
             beforeSubmit: function () {
                 if (checkForm('#aliziForm') == false) return false;
-
                 layer.closeAll();
                 layer.load();
                 btnSubmit.attr('disabled', true).val(lang.loading);
+              utq('track', 'Purchase', '124580');
             },
             success: function (data) {
                 layer.closeAll();
@@ -390,3 +406,7 @@
 </form>
 </body>
 </html>
+<script>
+
+  (function(w,d,t,s,q,m,n){if(w.utq)return;q=w.utq=function(){q.process?q.process(arguments):q.queue.push(arguments);};q.queue=[];m=d.getElementsByTagName(t)[0];n=d.createElement(t);n.src=s;n.async=true;m.parentNode.insertBefore(n,m);})(window,document,'script','https://image.uc.cn/s/uae/g/0s/ad/utracking.js');utq('set', 'convertMode', true);utq('set', 'trackurl', 'huichuan.sm.cn/lp');
+</script>

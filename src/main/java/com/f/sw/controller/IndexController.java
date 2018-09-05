@@ -136,6 +136,16 @@ public class IndexController {
       ).findFirst().isPresent()
     ).collect(Collectors.toList());
 
+    goodsList.forEach(goods -> {
+      GoodsIgnore gi = ignore.stream().filter(ig -> goods.getSku().equals(ig.getSku())).findFirst().get();
+      if (gi.getDiscount() != null) {
+        goods.setPrice(goods.getReferPrice() - gi.getDiscount().doubleValue());
+        goods.setDiscount(gi.getDiscount().doubleValue());
+      } else {
+        goods.setPrice(goods.getReferPrice());
+      }
+    });
+
     model.addAttribute("goodsList", goodsList);
     return "index";
   }

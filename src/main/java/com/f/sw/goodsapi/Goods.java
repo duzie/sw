@@ -11,10 +11,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Goods {
-    @JsonProperty("SKU")
-    String sku;
-    @JsonProperty("GoodsName")
-    String goodsName;
-    @JsonProperty("ReferPrice")
-    double referPrice;
+  @JsonProperty("SKU")
+  String sku;
+  @JsonProperty("GoodsName")
+  String goodsName;
+  @JsonProperty("ReferPrice")
+  double referPrice;
+
+  double price;
+  double discount;
 }

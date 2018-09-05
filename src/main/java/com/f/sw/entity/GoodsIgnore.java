@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -17,7 +18,8 @@ import javax.persistence.Table;
  */
 @Table(name = "S_GOODS_IGNORE")
 public class GoodsIgnore {
-    @Id
-    Integer id;
-    String sku;//接口API中的SKU
+  @Id
+  Integer id;
+  String sku;//接口API中的SKU
+  BigDecimal discount;//优惠
 }
