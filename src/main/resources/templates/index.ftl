@@ -351,10 +351,11 @@
         $('.operation').click(function(){
             $.post('operation',{operation:$(this).attr('o'),vistorId:'${serialNO}'})
         });
-
+      window.scrollBottom = false;
         $(window).scroll(function() {
-            if ($(document).scrollTop() >= $(document).height() - $(window).height()) {
-                $.post('scrollBottom',{vistorId:'${serialNO}'})
+            if (!window.scrollBottom && $(document).scrollTop() >= $(document).height() - $(window).height()) {
+              window.scrollBottom = true;
+              $.post('scrollBottom',{vistorId:'${serialNO}'})
             }
         });
 

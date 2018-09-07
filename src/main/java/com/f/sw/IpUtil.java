@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.fluent.Request;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 @Log4j2
 public class IpUtil {
@@ -57,8 +56,7 @@ public class IpUtil {
       BaiduLocation location = om.readValue(s, BaiduLocation.class);
       if (location.getStatus() != 2)
         return location.getContent().getAddress();
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
     }
     return "未知";
   }

@@ -78,7 +78,7 @@ public class IndexController {
   public String index(HttpServletRequest request, Model model) throws Exception {
 
     if (ipxz(IpUtil.getIpAdrress(request))) {
-      return "redirect:xz.html";
+      return "xz";
     }
 
     AccessRecord ar = new AccessRecord();
@@ -101,6 +101,17 @@ public class IndexController {
         ar.setPrefix(channel.getNm() + s);
       }
     }
+
+    if (StringUtils.isBlank(ar.getChannel())) {
+      String endc = requestUrl.substring(requestUrl.length() - 2, requestUrl.length());
+      Optional<Channel> otl = channelList.stream().filter(e -> e.getNm().toLowerCase().equals(endc.toLowerCase())).findFirst();
+      if (otl.isPresent()) {
+        Channel channel = otl.get();
+        ar.setChannel(channel.getName());
+        ar.setPrefix(channel.getNm() + s);
+      }
+    }
+
     if (StringUtils.isBlank(ar.getChannel())) {
       ar.setChannel("未知");
       ar.setPrefix("NO" + s);
@@ -152,7 +163,10 @@ public class IndexController {
 
   @GetMapping("close/{vistorId}")
   @ResponseBody
-  public void closePage(@PathVariable String vistorId) {
+  public void closePage(@PathVariable String vistorId, HttpServletRequest request) {
+    if (ipxz(IpUtil.getIpAdrress(request))) {
+      return;
+    }
     accessRecordService.updateClosePageDate(vistorId);
   }
 
@@ -160,7 +174,7 @@ public class IndexController {
   @GetMapping("order/{id}")
   public String order(@PathVariable int id, Model model, HttpServletRequest request) {
     if (ipxz(IpUtil.getIpAdrress(request))) {
-      return "redirect:xz.html";
+      return "xz";
     }
     Optional<GoodsOrder> opt = goodsOrderService.findById(id);
     if (opt.isPresent()) {
@@ -189,7 +203,7 @@ public class IndexController {
       return map;
     }
 
-    saveOperation(OperationRecord.builder().operation("下单购买").vistorId(goodsOrder.getVistorId()).build());
+    accessRecordService.saveOperationRecord(OperationRecord.builder().operation("下单购买").vistorId(goodsOrder.getVistorId()).build());
 
     goodsOrder.setProvince(goodsOrder.getProvince().split("\\|")[1]);
     goodsOrder.setCity(goodsOrder.getCity().split("\\|")[1]);
@@ -208,7 +222,7 @@ public class IndexController {
     String basePath = request.getScheme() + "://" + request.getServerName() + getContextPath;
     switch (goodsOrder.getPayment()) {
       case "4":
-        goodsOrder.setPayAmount(new BigDecimal(0.01));
+//        goodsOrder.setPayAmount(new BigDecimal(0.01));
         String form = alipay(goodsOrder, basePath);
         map.put("aliform", form);
         break;
@@ -236,7 +250,7 @@ public class IndexController {
   @PostMapping("order/{id}")
   public String wxpay(@PathVariable int id, Model model, HttpServletRequest request) {
     if (ipxz(IpUtil.getIpAdrress(request))) {
-      return "redirect:xz.html";
+      return "xz";
     }
     Optional<GoodsOrder> opt = goodsOrderService.findById(id);
 
@@ -244,7 +258,7 @@ public class IndexController {
     String basePath = request.getScheme() + "://" + request.getServerName() + getContextPath;
     if (opt.isPresent()) {
       GoodsOrder goodsOrder = opt.get();
-      goodsOrder.setPayAmount(new BigDecimal(0.01));
+//      goodsOrder.setPayAmount(new BigDecimal(0.01));
       if (RequestUtil.JudgeIsMoblie(request)) {
         WxPayMwebOrderResult r = wxUnifiedOrder(goodsOrder, request, basePath);
         model.addAttribute("wx", r);
@@ -261,14 +275,20 @@ public class IndexController {
 
   @PostMapping("operation")
   @ResponseBody
-  public void saveOperation(OperationRecord operationRecord) {
+  public void saveOperation(OperationRecord operationRecord, HttpServletRequest request) {
+    if (ipxz(IpUtil.getIpAdrress(request))) {
+      return;
+    }
     accessRecordService.saveOperationRecord(operationRecord);
   }
 
   @PostMapping("scrollBottom")
   @ResponseBody
-  public void scrollBottom(String vistorId) {
-    saveOperation(OperationRecord.builder().operation("下拉到底").vistorId(vistorId).build());
+  public void scrollBottom(String vistorId, HttpServletRequest request) {
+    if (ipxz(IpUtil.getIpAdrress(request))) {
+      return;
+    }
+    accessRecordService.saveOperationRecord(OperationRecord.builder().operation("下拉到底").vistorId(vistorId).build());
     accessRecordService.pulldown(vistorId);
   }
 
@@ -317,7 +337,7 @@ public class IndexController {
     String basePath = request.getScheme() + "://" + request.getServerName() + getContextPath;
     if (opt.isPresent()) {
       GoodsOrder goodsOrder = opt.get();
-      goodsOrder.setPayAmount(new BigDecimal(0.01));
+//      goodsOrder.setPayAmount(new BigDecimal(0.01));
       goodsOrder.setOpenId(wxMpUser.getOpenId());
       WxPayMpOrderResult r = wxUnifiedOrder(goodsOrder, request, basePath);
       model.addAttribute("wx", r);
@@ -486,6 +506,11 @@ public class IndexController {
   public static Map<String, List<Long>> ipMap = new HashMap<>();
 
   synchronized boolean ipxz(String ip) {
+
+    if (ipMap.keySet().size() > 1000) {
+      ipMap.clear();
+      return true;
+    }
     long time = System.currentTimeMillis();
     long otime = time - 10 * 1000;
     List<Long> list = ipMap.get(ip);
