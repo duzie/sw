@@ -57,9 +57,9 @@ public class AdController {
   public void getSoho(String atype, String clickid, long rTimestamp) {
     CloseableHttpAsyncClient httpclient = HttpAsyncClients.createDefault();
     String get = "http://t.ads.sohu.com/count/ac?clickid="
-      + clickid + "&atype=__"
-      + atype + "__&timestamp=__"
-      + rTimestamp + "__";
+      + clickid + "&atype="
+      + atype + "&timestamp="
+      + rTimestamp + "";
     try {
       httpclient.start();
       HttpGet request = new HttpGet(get);
