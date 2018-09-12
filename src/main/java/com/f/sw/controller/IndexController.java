@@ -320,7 +320,7 @@ public class IndexController {
 
   @RequestMapping("wx/{id}")
   public String wx(@PathVariable String id) {
-    String u = wxMpService.oauth2buildAuthorizationUrl(oauth2Url, WxConsts.OAuth2Scope.SNSAPI_USERINFO, id);
+    String u = wxMpService.oauth2buildAuthorizationUrl(oauth2Url, WxConsts.OAuth2Scope.SNSAPI_BASE, id);
     return "redirect:" + u;
   }
 

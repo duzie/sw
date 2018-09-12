@@ -2,6 +2,7 @@ logging:
   level:
     org.springframework.web: DEBUG
     com.f.sw: DEBUG
+  file: ./log/sw.log
 server:
   port: 9001
 #  port: 80
@@ -14,20 +15,47 @@ spring:
     url: jdbc:mysql://localhost:3306/sw?useUnicode=true&characterEncoding=UTF-8
     username: root
     password: 23456789
-#    data-username: root
-#    data-password: 23456789
-#    data: classpath:import.sql
-#    sql-script-encoding: utf-8
-#    initialization-mode: always
-  cache:
-    ehcache:
-      config: classpath:conf/ehcache.xml
+    #      data-username: root
+    #      data-password: 23456789
+    #      data: classpath:import.sql
+    #      sql-script-encoding: utf-8
+    #      initialization-mode: always
+
+    druid:
+      initial-size: 5
+      max-active: 20
+      min-aidle: 10
+      max-wait: 60000
+      keep-alive: true
+      validation-query: select 1
+      test-on-borrow: false
+      test-on-return: false
+      test-while-idle: true
+      time-between-eviction-runs-millis: 2000
+      min-evictable-idle-time-millis: 600000
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
-  mvc.static-path-pattern: /**
+    mvc.static-path-pattern: /**
   servlet.multipart.max-file-size: 10Mb
   resources.static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:${web.upload-path}
-#web.upload-path: /Users/fei/Downloads
 web:
   upload-path: /home/sw/upload
+  wx:
+    pay:
+      appId:
+      mchId:
+      mchKey:
+      subAppId:
+      subMchId:
+      keyPath:
+    mp:
+      appId:
+      secret:
+      token:
+      aesKey:
+      oauth2Url:
+  alipay:
+    appid:
+    privatekey: ˚
+    publickey:
