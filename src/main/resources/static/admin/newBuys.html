@@ -1,0 +1,154 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title> 搜索表单</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css"/>
+  <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css"/>
+  <link href="../assets/css/page-min.css" rel="stylesheet" type="text/css"/>
+  <script src="../js/ueditor/ueditor.all.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <div class="search-grid-container">
+    <div id="grid"></div>
+  </div>
+</div>
+<div id="content" class="hide">
+  <form id="J_Form" class="form-horizontal" action="/a/newBuys/add" method="post">
+    <input type="hidden" name="id">
+    <div class="row">
+      <div class="control-group span10">
+        <label class="control-label"><s>*</s>地区：</label>
+        <div class="controls">
+          <input name="loc" type="text" data-rules="{required:true}" class="input-normal control-text" placeholder="江西">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="control-group span10">
+        <label class="control-label"><s>*</s>购买用户：</label>
+        <div class="controls">
+          <input name="name" type="text" data-rules="{required:true}" class="input-normal control-text"
+                 placeholder="杨*[132****1856]">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="control-group span10">
+        <label class="control-label"><s>*</s>时间：</label>
+        <div class="controls">
+          <input name="time" type="text" data-rules="{required:true}" class="input-normal control-text"
+                 placeholder="5分钟前">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="control-group span15">
+        <label class="control-label"><s>*</s>描述：</label>
+        <div class="controls">
+          <input name="descr" type="text" data-rules="{required:true}" class="input-large control-text"
+                 placeholder="我卖酒！ - 套餐五:3280元买5箱30瓶(再送30瓶)">
+        </div>
+      </div>
+    </div>
+
+
+  </form>
+</div>
+
+<script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+<script type="text/javascript" src="../assets/js/bui-min.js"></script>
+<script type="text/javascript" src="../assets/js/config-min.js"></script>
+<script type="text/javascript">
+
+  BUI.use(['common/search', 'common/page', 'bui/uploader', 'bui/overlay', 'bui/form', 'bui/tooltip', 'bui/select'], function (Search, Page, Uploader, Overlay, Form, Tooltip, Select) {
+
+
+    var columns = [
+        {
+          title: '操作', dataIndex: '', width: 50, renderer: function (value, obj) {
+            var editStr = '<span class="grid-command btn-del" title="删除">删除</span>';
+            return editStr;
+
+
+          }
+        },
+        {title: '地区', dataIndex: 'loc', width: 150},
+        {title: '购买用户', dataIndex: 'name', width: 150},
+        {title: '时间', dataIndex: 'time', width: 150},
+        {title: '描述', dataIndex: 'descr', width: 350}
+      ],
+      store = Search.createStore('/a/newBuys/list'),
+      gridCfg = Search.createGridCfg(columns, {
+        tbar: {
+          items: [
+            {text: '<i class="icon-plus"></i>新建', btnCls: 'button button-small', handler: addFunction}
+          ]
+        }
+      });
+
+    var search = new Search({
+        store: store,
+        gridCfg: gridCfg
+      }),
+      grid = search.get('grid');
+
+    var form = new Form.Form({
+      srcNode: '#J_Form',
+      submitType: 'ajax',
+      callback: function (data) {
+        dialog.close();
+        search.load();
+      }
+    }).render();
+
+    var dialog = new Overlay.Dialog({
+      height: 250,
+      contentId: 'content',
+      success: function () {
+        form.submit();
+      }
+    });
+
+    function addFunction() {
+      $('#J_Form')[0].reset();
+      dialog.show();
+
+    }
+
+    function delFunction() {
+      var selections = grid.getSelection();
+      delItems(selections);
+    }
+
+    function delItems(id) {
+      BUI.Message.Confirm('确认要删除选中的记录么？', function () {
+        $.ajax({
+          url: '/a/newBuys/delete',
+          type: 'post',
+          dataType: 'json',
+          data: {id: id},
+          success: function (data) {
+            search.load();
+          }
+        });
+      }, 'question');
+    }
+
+
+    grid.on('cellclick', function (ev) {
+      var sender = $(ev.domTarget); //点击的Dom
+      var record = ev.record;
+      if (sender.hasClass('btn-del')) {
+        delItems(record.id);
+      }
+    });
+
+
+  });
+</script>
+
+<body>
+</html>

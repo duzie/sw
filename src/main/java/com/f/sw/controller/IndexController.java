@@ -12,10 +12,7 @@ import com.f.sw.entity.*;
 import com.f.sw.goodsapi.Goods;
 import com.f.sw.goodsapi.GoodsApi;
 import com.f.sw.goodsapi.Response;
-import com.f.sw.service.AccessRecordService;
-import com.f.sw.service.AreaService;
-import com.f.sw.service.GoodsOrderService;
-import com.f.sw.service.WebPageService;
+import com.f.sw.service.*;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.bean.order.WxPayMwebOrderResult;
@@ -67,6 +64,9 @@ public class IndexController {
 
   @Autowired
   GoodsOrderService goodsOrderService;
+
+  @Autowired
+  NewBuysService newBuysService;
 
 
   public static Map<String, WebPage> pageMap = new HashMap<>();
@@ -158,6 +158,12 @@ public class IndexController {
     });
 
     model.addAttribute("goodsList", goodsList);
+
+
+    Page<NewBuys> page= newBuysService.find(BUIPage.builder().limit(30).build());
+    model.addAttribute("newBuys", page.getContent());
+    model.addAttribute("timer", newBuysService.findSwTimer());
+
     return "index";
   }
 

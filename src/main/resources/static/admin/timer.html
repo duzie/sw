@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title> 搜索表单</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css"/>
+  <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css"/>
+  <link href="../assets/css/page-min.css" rel="stylesheet" type="text/css"/>
+  <script src="../js/ueditor/ueditor.all.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="row">
+    <form id="J_Form" class="form-horizontal span24">
+      <div class="row">
+        <div class=" span16">
+          <label class="control-label"><s>*</s>价格：</label>
+          <div class="controls">
+            <input name="timer_price" type="text" data-rules="{required:true}" class="input-normal control-text">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class=" span16">
+          <label class="control-label"><s>*</s>扫描价：</label>
+          <div class="controls">
+            <input name="timer_price1" type="text" data-rules="{required:true}" class="input-normal control-text">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class=" span16">
+          <label class="control-label"><s>*</s>折扣：</label>
+          <div class="controls">
+            <input name="timer_dis" type="text" data-rules="{required:true}" class="input-normal control-text">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class=" span16">
+          <label class="control-label"><s>*</s>节省：</label>
+          <div class="controls">
+            <input name="timer_dis_price" type="text" data-rules="{required:true}" class="input-normal control-text">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class=" span16">
+          <label class="control-label"><s>*</s>购买人数：</label>
+          <div class="controls">
+            <input name="timer_buy_count" type="text" data-rules="{required:true}" class="input-normal control-text">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class=" span16">
+          <label class="control-label"><s>*</s>剩余秒数：</label>
+          <div class="controls">
+            <input name="timer_seconds" type="text" data-rules="{required:true}" class="input-normal control-text">
+          </div>
+        </div>
+      </div>
+
+
+
+    </form></div>
+  <div class="row actions-bar">
+    <div class="form-actions span13 offset3">
+    <button type="submit" class="button button-primary">保存</button>
+    </div>
+    </div>
+
+    </div>
+
+
+    </body>
+
+
+    <script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+  <script type="text/javascript">
+
+    $.get('/a/sw/timer',function (data) {
+      console.log(data)
+      for(var k in data){
+        $('input[name="'+ k +'"]').val(data[k]);
+      }
+
+    })
+
+    $('.button-primary').click(function(){
+      $.post('/a/sw/timer',$('#J_Form').serialize(),function(data){
+        alert('保存成功');
+        })
+    });
+
+  </script>
+
+</html>

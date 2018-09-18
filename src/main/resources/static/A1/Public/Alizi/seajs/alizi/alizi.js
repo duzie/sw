@@ -121,34 +121,27 @@ define(function(require, exports, module) {
 
     exports.timer = function(elem,intDiff){
 
-        window.setInterval(function(){
-            var day=0,hour=0,minute=0,second=0,times=intDiff;
-            if(intDiff > 0){
-                day = Math.floor(intDiff / (60 * 60 * 24));
-                hour = Math.floor(intDiff / (60 * 60)) - (day * 24);
-                minute = Math.floor(intDiff / 60) - (day * 24 * 60) - (hour * 60);
-                second = Math.floor(intDiff) - (day * 24 * 60 * 60) - (hour * 60 * 60) - (minute * 60);
-            }
+      window.setInterval(function(){
+        var day=0,hour=0,minute=0,second=0;
+        if(intDiff > 0){
+          day = Math.floor(intDiff / (60 * 60 * 24));
+          hour = Math.floor(intDiff / (60 * 60)) - (day * 24);
+          minute = Math.floor(intDiff / 60) - (day * 24 * 60) - (hour * 60);
+          second = Math.floor(intDiff) - (day * 24 * 60 * 60) - (hour * 60 * 60) - (minute * 60);
+        }
 
-            hour = hour<10?'0'+hour:hour;
-            minute = minute<10?'0'+minute:minute;
-            second = second<10?'0'+second:second;
-
-            if(day==0 && hour=='00' && minute=='00' && second=='00'){
-                //$('.alizi-submit').attr('disabled','disabled').val(text);
-                $(elem).html(lang.actionEnd);
-            }else{
-                if(day==0){
-                    $(elem).find('.aliziDay').remove();
-                }else{
-                    $(elem).find('.aliziDay strong').html(day);
-                }
-                $(elem).find('.aliziHour strong').html(hour);
-                $(elem).find('.aliziMinute strong').html(minute);
-                $(elem).find('.aliziSecond strong').html(second);
-            }
-            intDiff--;
-        }, 1000);
+        var text = lang.actionEnd;
+        if(day==0 && hour==0 && minute==0 && second==0){
+          $('.alizi-submit').attr('disabled','disabled').val(text);
+        }else{
+          hour = hour<10?'0'+hour:hour;
+          minute = minute<10?'0'+minute:minute;
+          second = second<10?'0'+second:second;
+          text = "<span class='aliziDay'><b>"+day+"</b>天</span><span class='aliziDay'><b>"+hour+"</b>时</span><span class='aliziDay'><b>"+minute+"</b>分</span><span class='aliziDay'><b>"+second+"</b>秒</span>";
+        }
+        $(elem).html(text);
+        intDiff--;
+      }, 1000);
     }
     exports.getCode = function(){
         var second=60,
@@ -278,8 +271,5 @@ define(function(require, exports, module) {
         if(fx)eval(fx+'("'+params+'")');
     })
 
-
-    var scrollHeight = $('.alizi-scroll li').innerHeight();
-    $('.alizi-scroll').aliziScroll({speed:80,rowHeight:scrollHeight});
 
 });
