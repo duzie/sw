@@ -29,7 +29,6 @@ import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
-import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -160,7 +159,7 @@ public class IndexController {
     model.addAttribute("goodsList", goodsList);
 
 
-    Page<NewBuys> page= newBuysService.find(BUIPage.builder().limit(30).build());
+    Page<NewBuys> page = newBuysService.find(BUIPage.builder().limit(30).build());
     model.addAttribute("newBuys", page.getContent());
     model.addAttribute("timer", newBuysService.findSwTimer());
 
@@ -335,7 +334,7 @@ public class IndexController {
     WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.oauth2getAccessToken(code);
 
     //获得用户基本信息
-    WxMpUser wxMpUser = wxMpService.oauth2getUserInfo(wxMpOAuth2AccessToken, null);
+//    WxMpUser wxMpUser = wxMpService.oauth2getUserInfo(wxMpOAuth2AccessToken, null);
 
     Optional<GoodsOrder> opt = goodsOrderService.findById(Integer.valueOf(state));
 
@@ -344,7 +343,7 @@ public class IndexController {
     if (opt.isPresent()) {
       GoodsOrder goodsOrder = opt.get();
 //      goodsOrder.setPayAmount(new BigDecimal(0.01));
-      goodsOrder.setOpenId(wxMpUser.getOpenId());
+      goodsOrder.setOpenId(wxMpOAuth2AccessToken.getOpenId());
       WxPayMpOrderResult r = wxUnifiedOrder(goodsOrder, request, basePath);
       model.addAttribute("wx", r);
       model.addAttribute("o", goodsOrder);
