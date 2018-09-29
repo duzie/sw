@@ -91,6 +91,14 @@
         float: left;
         width: 65%;
       }
+      .header1{
+        font-size: 1.5rem;
+        padding-bottom: 1rem;
+        text-align: center;width:100%;padding-top: 1.5rem;background: #44361C;
+      }
+      .header1 a{
+        width: 30%;
+      }
   </style>
 </head>
 <body>
@@ -99,13 +107,20 @@
 <!--[if lt IE 9]>
 <style>.header h1, .footer {
   color: #666;
-}</style>
+}
+</style>
 <![endif]-->
 
 <div class="wrapper alizi-detail-wrap">
 
 
   <div class="alizi-page alizi-detail-content" >
+
+    <div class="header1">
+      <a href="./">首页 </a>
+      <a href="http://baijiu-world.com/">公司介绍 </a>
+      <a href="http://baijiu-world.com/a/lianxiwomen/">联系我们 </a>
+    </div>
   ${wp.content!}
     <div class="buy">
       <div class="row1">
